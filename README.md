@@ -1,5 +1,7 @@
 # Clinical Document Intelligence
 
+[Live Interactive Demo](https://maharshimak.github.io/makma-ai-os/projects/clinical-document-intelligence/) · [AI Systems Lab](https://maharshimak.github.io/makma-ai-os/projects/)
+
 Rule-based extraction and validation of structured study fields from synthetic clinical-style text.
 
 ## Implemented now
