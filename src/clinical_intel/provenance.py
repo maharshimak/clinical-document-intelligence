@@ -22,11 +22,19 @@ class ExtractionProvenance:
 
 
 _PATTERNS = {
-    "study_id": re.compile(r"study\s*(?:id)?\s*:\s*([A-Z0-9-]+)", re.IGNORECASE),
-    "phase": re.compile(r"phase\s*:\s*([^\n]+)", re.IGNORECASE),
-    "participants": re.compile(r"participants?\s*:\s*(-?\d+)\b", re.IGNORECASE),
-    "intervention": re.compile(r"intervention\s*:\s*([^\n]+)", re.IGNORECASE),
-    "primary_endpoint": re.compile(r"primary endpoint\s*:\s*([^\n]+)", re.IGNORECASE),
+    "study_id": re.compile(
+        r"^study[ \t]*(?:id)?[ \t]*:[ \t]*([^\r\n]*)", re.IGNORECASE | re.MULTILINE
+    ),
+    "phase": re.compile(r"^phase[ \t]*:[ \t]*([^\r\n]*)", re.IGNORECASE | re.MULTILINE),
+    "participants": re.compile(
+        r"^participants?[ \t]*:[ \t]*([^\r\n]*)", re.IGNORECASE | re.MULTILINE
+    ),
+    "intervention": re.compile(
+        r"^intervention[ \t]*:[ \t]*([^\r\n]*)", re.IGNORECASE | re.MULTILINE
+    ),
+    "primary_endpoint": re.compile(
+        r"^primary endpoint[ \t]*:[ \t]*([^\r\n]*)", re.IGNORECASE | re.MULTILINE
+    ),
 }
 
 
@@ -47,7 +55,7 @@ def extract_with_provenance(text: str) -> ExtractionProvenance:
     evidence: list[FieldEvidence] = []
     for field, pattern in _PATTERNS.items():
         match = pattern.search(text)
-        if match is None:
+        if match is None or not match.group(1).strip():
             continue
         evidence.append(
             FieldEvidence(

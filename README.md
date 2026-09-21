@@ -6,6 +6,28 @@
 
 Rule-based extraction and validation of structured study fields from synthetic clinical-style text.
 
+
+## Product contract — engineering upgrade
+
+**Problem and audience:** A human-review workspace for document engineers extracting study metadata with traceable source evidence.
+
+**Live tool:** https://maharshimak.github.io/makma-ai-os/projects/clinical-document-intelligence/
+
+**Implemented browser workflow:** Labeled metadata extraction, source highlights and offsets, normalized record, completeness/schema/evidence coverage, validation gate, original-versus-human-corrected values and JSON export. Corrections never inherit extracted evidence.
+
+**Backend and parity contract:** Python extraction and provenance now consume whole labeled lines; blank fields cannot capture the next line and fractional participant counts cannot be truncated. Python rejects malformed counts; the browser preserves their text and displays a validation error to support correction. Browser offsets are UTF-16 code units; Python offsets are Unicode code points.
+
+**Architecture:** `makma-ai-os/demo` is the shared web product source and Pages deployment. This repository owns its Python domain package. The central `tests/e2e` suite exercises all nine products; `tests/fixtures/python-parity.json` plus `scripts/generate_parity.py` guard shared mathematical contracts. Backend revisions used for regeneration are pinned in the central `backend-lock.json`.
+
+**Safety and limitations:** Synthetic document engineering demonstration. Not medical advice and not a clinical decision system. Five labeled fields only; no OCR, free-form clinical understanding or medical recommendations. Inputs are validated, rendered user values are escaped, and deterministic results are not presented as model inference.
+
+**Verification:** Run `python -m ruff check .` and `python -m pytest -q`. `tests/test_engineering_upgrade.py` protects the new rejection/correctness paths. Central web checks: `npm ci`, `npm test`, `npm run build`, `npx playwright install --with-deps chromium`, `npm run test:e2e`. CI gates publishing on browser interactions and validates all public URLs after deployment.
+
+**Highest-value next work:** Versioned review records, document ingestion and adjudicated extraction-quality datasets.
+
+**Provenance:** Independent MAK’MA Studio engineering implementation; examples are synthetic and no employer code or data is included. Existing MIT license applies.
+
+
 ## Implemented now
 
 - Extract study ID, phase, participant count, intervention and primary endpoint.
