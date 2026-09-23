@@ -19,7 +19,7 @@ Rule-based extraction and validation of structured study fields from synthetic c
 
 **Architecture:** `makma-ai-os/demo` is the shared web product source and Pages deployment. This repository owns its Python domain package. The central `tests/e2e` suite exercises all nine products; `tests/fixtures/python-parity.json` plus `scripts/generate_parity.py` guard shared mathematical contracts. Backend revisions used for regeneration are pinned in the central `backend-lock.json`.
 
-**Safety and limitations:** Synthetic document engineering demonstration. Not medical advice and not a clinical decision system. Deterministic extraction supports a bounded labeled schema and common aliases; it does not provide OCR, free-form clinical understanding, diagnosis or medical recommendations. Inputs are validated, rendered user values are escaped, and deterministic results are not presented as model inference.
+**Safety and limitations:** Synthetic document engineering demonstration. Not medical advice and not a clinical decision system. The library can ingest bounded UTF-8 text/Markdown and text-bearing PDFs, then apply deterministic evidence-backed extraction. Image-only PDFs are rejected explicitly because OCR is not implemented. It does not provide free-form clinical understanding, diagnosis or medical recommendations. Inputs are validated, rendered user values are escaped, and deterministic results are not presented as model inference.
 
 **Verification:** Run `python -m ruff check .` and `python -m pytest -q`. `tests/test_engineering_upgrade.py` protects the new rejection/correctness paths. Central web checks: `npm ci`, `npm test`, `npm run build`, `npx playwright install --with-deps chromium`, `npm run test:e2e`. CI gates publishing on browser interactions and validates all public URLs after deployment.
 
@@ -34,6 +34,7 @@ Rule-based extraction and validation of structured study fields from synthetic c
 - Normalize Roman-numeral phases I–IV to 1–4.
 - Validate study identifier presence, positive participant counts and supported phases.
 - Preserve source evidence spans and normalized values for every recognized extracted field.
+- Ingest bounded `.txt`, `.md`, and text-bearing `.pdf` documents before extraction.
 
 ## Scope and limitations
 
@@ -88,7 +89,7 @@ docker run --rm clinical-document-intelligence
 
 ## Next engineering work
 
-Document/PDF ingestion, richer synthetic fixtures, versioned review records, extraction-quality evaluation, and an optional structured model adapter with evidence mapping and human review. These are planned work, not current capabilities.
+Richer synthetic fixtures, versioned review records, extraction-quality evaluation, OCR as an explicit optional adapter, and an optional structured model adapter with evidence mapping and human review. These are planned work, not current capabilities.
 
 ## Contributing and security
 
