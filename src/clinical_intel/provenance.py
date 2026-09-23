@@ -19,23 +19,42 @@ class ExtractionProvenance:
     evidence: tuple[FieldEvidence, ...]
     evidence_coverage: float
     schema_coverage: float
+    extended_schema_coverage: float = 0.0
 
 
 _PATTERNS = {
     "study_id": re.compile(
-        r"^study[ \t]*(?:id)?[ \t]*:[ \t]*([^\r\n]*)", re.IGNORECASE | re.MULTILINE
+        r"^(?:study[ \t]*(?:id)?|trial id|protocol id)[ \t]*:[ \t]*([^\r\n]*)",
+        re.IGNORECASE | re.MULTILINE,
     ),
     "phase": re.compile(r"^phase[ \t]*:[ \t]*([^\r\n]*)", re.IGNORECASE | re.MULTILINE),
     "participants": re.compile(
-        r"^participants?[ \t]*:[ \t]*([^\r\n]*)", re.IGNORECASE | re.MULTILINE
+        r"^(?:participants?|enrollment|sample size)[ \t]*:[ \t]*([^\r\n]*)",
+        re.IGNORECASE | re.MULTILINE,
     ),
     "intervention": re.compile(
-        r"^intervention[ \t]*:[ \t]*([^\r\n]*)", re.IGNORECASE | re.MULTILINE
+        r"^(?:intervention|treatment)[ \t]*:[ \t]*([^\r\n]*)",
+        re.IGNORECASE | re.MULTILINE,
     ),
     "primary_endpoint": re.compile(
-        r"^primary endpoint[ \t]*:[ \t]*([^\r\n]*)", re.IGNORECASE | re.MULTILINE
+        r"^(?:primary endpoint|primary outcome)[ \t]*:[ \t]*([^\r\n]*)",
+        re.IGNORECASE | re.MULTILINE,
+    ),
+    "sponsor": re.compile(r"^sponsor[ \t]*:[ \t]*([^\r\n]*)", re.IGNORECASE | re.MULTILINE),
+    "condition": re.compile(
+        r"^(?:condition|disease)[ \t]*:[ \t]*([^\r\n]*)",
+        re.IGNORECASE | re.MULTILINE,
+    ),
+    "study_type": re.compile(
+        r"^(?:study type|study design|design)[ \t]*:[ \t]*([^\r\n]*)",
+        re.IGNORECASE | re.MULTILINE,
+    ),
+    "secondary_endpoint": re.compile(
+        r"^(?:secondary endpoint|secondary outcome)[ \t]*:[ \t]*([^\r\n]*)",
+        re.IGNORECASE | re.MULTILINE,
     ),
 }
+_CORE_FIELDS = {"study_id", "phase", "participants", "intervention", "primary_endpoint"}
 
 
 def _normalize(field: str, raw_value: str) -> str:
@@ -45,6 +64,8 @@ def _normalize(field: str, raw_value: str) -> str:
             cleaned.upper(),
             cleaned,
         )
+    if field == "participants":
+        return cleaned.replace(",", "")
     return cleaned
 
 
@@ -67,20 +88,24 @@ def extract_with_provenance(text: str) -> ExtractionProvenance:
             )
         )
 
-    non_null_fields = sum(
-        value is not None
-        for value in (
-            record.study_id,
-            record.phase,
-            record.participants,
-            record.intervention,
-            record.primary_endpoint,
-        )
+    record_values = (
+        record.study_id,
+        record.phase,
+        record.participants,
+        record.intervention,
+        record.primary_endpoint,
+        record.sponsor,
+        record.condition,
+        record.study_type,
+        record.secondary_endpoint,
     )
+    non_null_fields = sum(value is not None for value in record_values)
+    core_evidence = sum(item.field in _CORE_FIELDS for item in evidence)
     evidence_coverage = len(evidence) / non_null_fields if non_null_fields else 0.0
     return ExtractionProvenance(
         record=record,
         evidence=tuple(evidence),
         evidence_coverage=evidence_coverage,
-        schema_coverage=len(evidence) / len(_PATTERNS),
+        schema_coverage=core_evidence / len(_CORE_FIELDS),
+        extended_schema_coverage=len(evidence) / len(_PATTERNS),
     )
