@@ -35,6 +35,8 @@ Evidence-grounded clinical document extraction with a deterministic baseline, op
 - Validate study identifier presence, positive participant counts and supported phases.
 - Preserve source evidence spans and normalized values for every recognized extracted field.
 - Ingest bounded `.txt`, `.md`, and text-bearing `.pdf` documents before extraction.
+- Optional model-backed extraction for less-structured prose with strict source-evidence anchoring.
+- Optional Docling document-understanding/OCR path via `pip install -e ".[document-ai]"`.
 - Optional OpenAI-compatible model extraction for unstructured prose, with fail-closed verbatim evidence anchoring for every extracted field.
 - Optional Docling ingestion for richer document structure/OCR workflows when installed via `pip install -e ".[document-ai]"`.
 
