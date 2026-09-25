@@ -6,7 +6,6 @@ from urllib import request
 
 from clinical_intel.extract import StudyRecord, validate
 
-
 _FIELDS = (
     "study_id",
     "phase",
@@ -93,7 +92,7 @@ class OpenAICompatibleClinicalExtractor:
             raise ValueError("Clinical extractor returned invalid JSON.") from error
         fields = payload.get("fields")
         if not isinstance(fields, dict):
-            raise ValueError("Clinical extraction JSON must contain a fields object.")
+            raise TypeError("Clinical extraction JSON must contain a fields object.")
         unknown = sorted(set(fields) - set(_FIELDS))
         if unknown:
             raise ValueError("Unknown extracted field(s): " + ", ".join(unknown))
@@ -105,7 +104,7 @@ class OpenAICompatibleClinicalExtractor:
         for field in _FIELDS:
             item = fields.get(field, {"value": None, "evidence": None})
             if not isinstance(item, dict):
-                raise ValueError(f"Field {field} must be an object.")
+                raise TypeError(f"Field {field} must be an object.")
             value = item.get("value")
             evidence = item.get("evidence")
 
