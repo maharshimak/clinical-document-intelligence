@@ -4,7 +4,7 @@
 
 [Live Product Demo](https://maharshimak.github.io/makma-ai-os/projects/clinical-document-intelligence/) · [MAK'MA Labs](https://maharshimak.github.io/makma-ai-os/projects/)
 
-Rule-based extraction and validation of structured study fields from synthetic clinical-style text.
+Evidence-grounded clinical document extraction with a deterministic baseline, optional model-backed structured extraction, human review provenance and an optional Docling document-understanding pipeline.
 
 
 ## Product contract — engineering upgrade
@@ -19,7 +19,7 @@ Rule-based extraction and validation of structured study fields from synthetic c
 
 **Architecture:** `makma-ai-os/demo` is the shared web product source and Pages deployment. This repository owns its Python domain package. The central `tests/e2e` suite exercises all nine products; `tests/fixtures/python-parity.json` plus `scripts/generate_parity.py` guard shared mathematical contracts. Backend revisions used for regeneration are pinned in the central `backend-lock.json`.
 
-**Safety and limitations:** Synthetic document engineering demonstration. Not medical advice and not a clinical decision system. The library can ingest bounded UTF-8 text/Markdown and text-bearing PDFs, then apply deterministic evidence-backed extraction. Image-only PDFs are rejected explicitly because OCR is not implemented. It does not provide free-form clinical understanding, diagnosis or medical recommendations. Inputs are validated, rendered user values are escaped, and deterministic results are not presented as model inference.
+**Safety and limitations:** Synthetic document engineering demonstration. Not medical advice and not a clinical decision system. The lightweight baseline ingests bounded UTF-8 text/Markdown and text-bearing PDFs and applies deterministic evidence-backed extraction. An optional OpenAI-compatible extractor can handle unstructured prose but every non-null field must be anchored to a verbatim source span. An optional Docling pipeline can provide richer layout/OCR-aware ingestion when the `document-ai` extra is installed. No extraction result should be treated as a diagnosis or medical recommendation.
 
 **Verification:** Run `python -m ruff check .` and `python -m pytest -q`. `tests/test_engineering_upgrade.py` protects the new rejection/correctness paths. Central web checks: `npm ci`, `npm test`, `npm run build`, `npx playwright install --with-deps chromium`, `npm run test:e2e`. CI gates publishing on browser interactions and validates all public URLs after deployment.
 
@@ -35,10 +35,14 @@ Rule-based extraction and validation of structured study fields from synthetic c
 - Validate study identifier presence, positive participant counts and supported phases.
 - Preserve source evidence spans and normalized values for every recognized extracted field.
 - Ingest bounded `.txt`, `.md`, and text-bearing `.pdf` documents before extraction.
+- Optional model-backed extraction for less-structured prose with strict source-evidence anchoring.
+- Optional Docling document-understanding/OCR path via `pip install -e ".[document-ai]"`.
+- Optional OpenAI-compatible model extraction for unstructured prose, with fail-closed verbatim evidence anchoring for every extracted field.
+- Optional Docling ingestion for richer document structure/OCR workflows when installed via `pip install -e ".[document-ai]"`.
 
 ## Scope and limitations
 
-Regex rules expect labeled fields in plain text. There is no OCR, model-based NLP, calibrated confidence scoring or clinical interpretation. Evidence spans are preserved for recognized fields, including common aliases, but unstructured prose is not semantically interpreted. Validation is deliberately narrow; missing fields other than study ID can remain null. No real patient or employer documents are included. This is not a clinical decision tool.
+The deterministic regex baseline still expects labeled fields in plain text. Model-backed extraction and Docling ingestion are optional adapters, not required dependencies; calibrated confidence scoring and clinical interpretation are still out of scope. Evidence spans are preserved for recognized fields, including common aliases, but unstructured prose is not semantically interpreted. Validation is deliberately narrow; missing fields other than study ID can remain null. No real patient or employer documents are included. This is not a clinical decision tool.
 
 ## Installation and development
 
