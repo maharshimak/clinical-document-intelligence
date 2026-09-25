@@ -14,6 +14,7 @@ dependencies = ["pypdf>=6.0.0,<7"]
 
 [project.optional-dependencies]
 dev = ["pytest>=9.1.1,<10","ruff>=0.16.7,<1"]
+document-ai = ["docling>=2.130.0,<3"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
