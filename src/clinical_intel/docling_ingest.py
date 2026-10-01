@@ -30,11 +30,15 @@ class DoclingClinicalPipeline:
     """
 
     extractor: OpenAICompatibleClinicalExtractor
+    max_bytes: int = 20_000_000
+    max_markdown_chars: int = 500_000
 
     def ingest(self, path: str | Path) -> IntelligentDocument:
         source = Path(path)
         if not source.is_file():
             raise FileNotFoundError(source)
+        if source.stat().st_size > self.max_bytes:
+            raise ValueError(f"Document exceeds {self.max_bytes} byte Docling limit.")
         try:
             from docling.document_converter import DocumentConverter
         except ImportError as error:
@@ -47,6 +51,10 @@ class DoclingClinicalPipeline:
         markdown = result.document.export_to_markdown()
         if not markdown.strip():
             raise ValueError("Docling produced no document text.")
+        if len(markdown) > self.max_markdown_chars:
+            raise ValueError(
+                f"Docling output exceeds {self.max_markdown_chars} character limit."
+            )
         extraction = self.extractor.extract(markdown)
         return IntelligentDocument(
             source_path=str(source),

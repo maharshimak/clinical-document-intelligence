@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass
 from urllib import request
 
@@ -128,15 +129,34 @@ class OpenAICompatibleClinicalExtractor:
                     value = int(str(value).replace(",", "").strip())
                 except ValueError as error:
                     raise ValueError("participants must be an integer.") from error
+                evidence_numbers = {
+                    int(token.replace(",", ""))
+                    for token in re.findall(r"\b\d[\d,]*\b", evidence)
+                }
+                if value not in evidence_numbers:
+                    raise ValueError(
+                        "participants value is not supported by its evidence span."
+                    )
             elif field == "phase":
                 rendered = str(value).strip()
                 value = {"I": "1", "II": "2", "III": "3", "IV": "4"}.get(
                     rendered.upper(), rendered
                 )
+                evidence_phase = evidence.upper()
+                supported = {
+                    "1": ("PHASE 1", "PHASE I"),
+                    "2": ("PHASE 2", "PHASE II"),
+                    "3": ("PHASE 3", "PHASE III"),
+                    "4": ("PHASE 4", "PHASE IV"),
+                }.get(str(value), ())
+                if supported and not any(token in evidence_phase for token in supported):
+                    raise ValueError("phase value is not supported by its evidence span.")
             else:
                 value = str(value).strip()
                 if not value:
                     raise ValueError(f"Field {field} cannot be empty.")
+                if field == "study_id" and value.casefold() not in evidence.casefold():
+                    raise ValueError("study_id value is not supported by its evidence span.")
 
             values[field] = value
             grounded += 1

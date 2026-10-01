@@ -15,3 +15,17 @@ def test_empty_fields_do_not_capture_next_line():
     assert result.record.intervention is None
     assert result.record.primary_endpoint == "Survival"
     assert all(e.field != "intervention" for e in result.evidence)
+
+
+
+def test_model_extractor_rejects_numeric_value_not_supported_by_evidence():
+    from clinical_intel.model_extract import OpenAICompatibleClinicalExtractor
+
+    extractor = OpenAICompatibleClinicalExtractor(base_url="http://localhost", model="test")
+    source = "Participants: 120"
+    raw = '{"fields":{"participants":{"value":999,"evidence":"Participants: 120"}}}'
+
+    import pytest
+
+    with pytest.raises(ValueError, match="not supported"):
+        extractor.parse(source, raw)
