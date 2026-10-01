@@ -29,3 +29,14 @@ def test_model_extractor_rejects_numeric_value_not_supported_by_evidence():
 
     with pytest.raises(ValueError, match="not supported"):
         extractor.parse(source, raw)
+
+
+def test_model_extractor_rejects_categorical_value_not_supported_by_evidence():
+    from clinical_intel.model_extract import OpenAICompatibleClinicalExtractor
+
+    extractor = OpenAICompatibleClinicalExtractor(base_url="http://localhost", model="test")
+    source = "Sponsor: Acme Biopharma"
+    raw = '{"fields":{"sponsor":{"value":"Other Corp","evidence":"Sponsor: Acme Biopharma"}}}'
+
+    with pytest.raises(ValueError, match="not supported"):
+        extractor.parse(source, raw)

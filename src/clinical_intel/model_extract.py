@@ -155,8 +155,29 @@ class OpenAICompatibleClinicalExtractor:
                 value = str(value).strip()
                 if not value:
                     raise ValueError(f"Field {field} cannot be empty.")
-                if field == "study_id" and value.casefold() not in evidence.casefold():
+
+                normalized_value = re.sub(
+                    r"[^\w]+",
+                    " ",
+                    value.casefold(),
+                    flags=re.UNICODE,
+                ).strip()
+                normalized_evidence = re.sub(
+                    r"[^\w]+",
+                    " ",
+                    evidence.casefold(),
+                    flags=re.UNICODE,
+                ).strip()
+
+                if field == "study_id" and normalized_value not in normalized_evidence:
                     raise ValueError("study_id value is not supported by its evidence span.")
+                if (
+                    field in {"sponsor", "condition", "study_type", "intervention"}
+                    and normalized_value not in normalized_evidence
+                ):
+                    raise ValueError(
+                        f"{field} value is not supported by its evidence span."
+                    )
 
             values[field] = value
             grounded += 1
