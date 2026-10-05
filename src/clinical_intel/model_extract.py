@@ -35,6 +35,9 @@ class ModelExtractionResult:
     evidence: tuple[ModelFieldEvidence, ...]
     validation_errors: tuple[str, ...]
     grounded_fields: int
+    evidence_coverage: float = 0.0
+    requires_review: bool = False
+    review_reasons: tuple[str, ...] = ()
 
 
 @dataclass(slots=True)
@@ -169,12 +172,7 @@ class OpenAICompatibleClinicalExtractor:
                     flags=re.UNICODE,
                 ).strip()
 
-                if field == "study_id" and normalized_value not in normalized_evidence:
-                    raise ValueError("study_id value is not supported by its evidence span.")
-                if (
-                    field in {"sponsor", "condition", "study_type", "intervention"}
-                    and normalized_value not in normalized_evidence
-                ):
+                if normalized_value not in normalized_evidence:
                     raise ValueError(
                         f"{field} value is not supported by its evidence span."
                     )
@@ -186,9 +184,21 @@ class OpenAICompatibleClinicalExtractor:
             )
 
         record = StudyRecord(**values)
+        validation_errors = tuple(validate(record))
+        populated_fields = sum(value is not None for value in values.values())
+        evidence_coverage = grounded / populated_fields if populated_fields else 0.0
+        critical_fields = ("study_id", "phase", "participants", "primary_endpoint")
+        review_reasons = list(validation_errors)
+        for field in critical_fields:
+            if getattr(record, field) is None:
+                review_reasons.append(f"critical field missing: {field}")
+
         return ModelExtractionResult(
             record=record,
             evidence=tuple(evidence_rows),
-            validation_errors=tuple(validate(record)),
+            validation_errors=validation_errors,
             grounded_fields=grounded,
+            evidence_coverage=evidence_coverage,
+            requires_review=bool(review_reasons),
+            review_reasons=tuple(dict.fromkeys(review_reasons)),
         )

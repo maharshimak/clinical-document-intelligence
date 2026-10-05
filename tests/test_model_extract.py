@@ -43,3 +43,40 @@ def test_model_extraction_rejects_unanchored_claims():
             }
             """,
         )
+
+
+def test_model_extraction_requires_value_to_be_inside_endpoint_evidence():
+    with pytest.raises(ValueError, match="primary_endpoint value is not supported"):
+        extractor().parse(
+            "Primary endpoint: Overall survival at 12 months.",
+            """
+            {
+              "fields": {
+                "primary_endpoint": {
+                  "value":"Progression-free survival",
+                  "evidence":"Primary endpoint: Overall survival at 12 months."
+                }
+              }
+            }
+            """,
+        )
+
+
+def test_model_extraction_surfaces_review_state_for_missing_critical_fields():
+    source = "Protocol ABC-1 is a Phase III study with 180 participants."
+    result = extractor().parse(
+        source,
+        """
+        {
+          "fields": {
+            "study_id": {"value":"ABC-1","evidence":"ABC-1"},
+            "phase": {"value":"III","evidence":"Phase III"},
+            "participants": {"value":180,"evidence":"180 participants"}
+          }
+        }
+        """,
+    )
+
+    assert result.evidence_coverage == 1.0
+    assert result.requires_review is True
+    assert "critical field missing: primary_endpoint" in result.review_reasons
