@@ -6,6 +6,15 @@ The format follows the intent of [Keep a Changelog](https://keepachangelog.com/)
 
 ## [Unreleased]
 
+### Fixed
+- Evidence spans for labeled values exclude surrounding whitespace, so `text[start:end] == raw_value`.
+- Participant counts with misplaced thousands separators (`1,2,5,0`) or non-ASCII digits are rejected instead of silently merged.
+- Ingested UTF-8 files with a byte-order mark no longer lose the first-line field; text files are decoded without newline translation so offsets refer to the hashed text.
+- Lone-CR line endings are recognised as line breaks.
+
+### Added
+- Versioned `SourceDocument`, field-level evidence with verified spans, per-field schema validation, explicit confidence origin, append-only hash-chained review history, structured JSON export, field-level evaluation with a bundled synthetic set, and the `makma.v1` contract (`extract`, `apply_correction`, `export`, `evaluate`).
+
 ### Engineering
 - Added repository ownership and structured contribution workflows.
 - Added Dependabot coverage for Python and GitHub Actions dependencies.
