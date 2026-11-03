@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from hashlib import sha256
 from pathlib import Path
 
 from pypdf import PdfReader
 
+from clinical_intel.document import SourceDocument
 from clinical_intel.provenance import ExtractionProvenance, extract_with_provenance
 
 
@@ -18,16 +20,20 @@ class IngestedDocument:
     media_type: str
     text: str
     extraction: ExtractionProvenance
+    document: SourceDocument | None = None
+    """Versioned text that ``extraction`` offsets refer to (``document.text == text``)."""
 
 
-def _read_text(path: Path, max_bytes: int) -> str:
+def _read_text(path: Path, max_bytes: int) -> SourceDocument:
     size = path.stat().st_size
     if size > max_bytes:
         raise DocumentIngestionError(f"Document exceeds {max_bytes} byte limit.")
+    # Decode the exact bytes: no newline translation, so offsets and the document
+    # hash describe the same text; a leading UTF-8 BOM is removed (see SourceDocument).
     try:
-        return path.read_text(encoding="utf-8")
-    except UnicodeDecodeError as error:
-        raise DocumentIngestionError("Text document must be UTF-8 encoded.") from error
+        return SourceDocument.from_utf8_bytes(path.read_bytes())
+    except ValueError as error:
+        raise DocumentIngestionError(str(error)) from error
 
 
 def _read_pdf(path: Path, max_bytes: int, max_pages: int) -> str:
@@ -66,17 +72,24 @@ def ingest_document(
 
     suffix = source.suffix.casefold()
     if suffix in {".txt", ".md"}:
-        text = _read_text(source, max_bytes)
-        media_type = "text/plain"
+        document = _read_text(source, max_bytes)
     elif suffix == ".pdf":
         text = _read_pdf(source, max_bytes, max_pages)
-        media_type = "application/pdf"
+        try:
+            document = SourceDocument.from_text(
+                text,
+                media_type="application/pdf",
+                source_sha256=sha256(source.read_bytes()).hexdigest(),
+            )
+        except ValueError as error:
+            raise DocumentIngestionError(str(error)) from error
     else:
         raise DocumentIngestionError("Supported document types are .txt, .md and .pdf.")
 
     return IngestedDocument(
         source_path=str(source),
-        media_type=media_type,
-        text=text,
-        extraction=extract_with_provenance(text),
+        media_type=document.media_type,
+        text=document.text,
+        extraction=extract_with_provenance(document.text),
+        document=document,
     )
