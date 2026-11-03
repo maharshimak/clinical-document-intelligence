@@ -1,0 +1,199 @@
+{
+  "dataset": "synthetic_v1",
+  "description": "Synthetic study-metadata documents with hand-written gold labels for all nine schema fields. Labels were written and checked line by line against each text by the author of this dataset; they are not clinically validated and contain no real data.",
+  "label_policy": "Gold values use the normalized schema form (phase '1'-'4', participants integer, strings verbatim from the text without surrounding whitespace). A field is null when the text does not state an exact value.",
+  "examples": [
+    {
+      "id": "syn-001-complete-labeled",
+      "text": "Study ID: SYN-001\nPhase: 2\nParticipants: 120\nIntervention: Example compound A\nPrimary Endpoint: Change in synthetic score at week 12\nSponsor: Example Research Foundation\nCondition: Example condition\nStudy Type: Interventional\nSecondary Endpoint: Synthetic tolerability score\n",
+      "gold": {
+        "study_id": "SYN-001",
+        "phase": "2",
+        "participants": 120,
+        "intervention": "Example compound A",
+        "primary_endpoint": "Change in synthetic score at week 12",
+        "sponsor": "Example Research Foundation",
+        "condition": "Example condition",
+        "study_type": "Interventional",
+        "secondary_endpoint": "Synthetic tolerability score"
+      },
+      "notes": "All nine labels present, LF line endings."
+    },
+    {
+      "id": "syn-002-aliases-roman-grouped",
+      "text": "Protocol ID: P-2026-17\nPhase: III\nEnrollment: 1,250\nTreatment: Therapy X\nPrimary outcome: Overall survival\n",
+      "gold": {
+        "study_id": "P-2026-17",
+        "phase": "3",
+        "participants": 1250,
+        "intervention": "Therapy X",
+        "primary_endpoint": "Overall survival",
+        "sponsor": null,
+        "condition": null,
+        "study_type": null,
+        "secondary_endpoint": null
+      },
+      "notes": "Label aliases, Roman phase, thousands separator."
+    },
+    {
+      "id": "syn-003-crlf",
+      "text": "Trial ID: SYN-003\r\nPhase: 1\r\nSample size: 24\r\nIntervention: Example compound B\r\nPrimary Endpoint: Synthetic safety events\r\n",
+      "gold": {
+        "study_id": "SYN-003",
+        "phase": "1",
+        "participants": 24,
+        "intervention": "Example compound B",
+        "primary_endpoint": "Synthetic safety events",
+        "sponsor": null,
+        "condition": null,
+        "study_type": null,
+        "secondary_endpoint": null
+      },
+      "notes": "CRLF line endings."
+    },
+    {
+      "id": "syn-004-lone-cr",
+      "text": "Study ID: SYN-004\rPhase: 4\rParticipants: 300\rPrimary Endpoint: Synthetic adherence rate\r",
+      "gold": {
+        "study_id": "SYN-004",
+        "phase": "4",
+        "participants": 300,
+        "intervention": null,
+        "primary_endpoint": "Synthetic adherence rate",
+        "sponsor": null,
+        "condition": null,
+        "study_type": null,
+        "secondary_endpoint": null
+      },
+      "notes": "Lone CR line endings."
+    },
+    {
+      "id": "syn-005-unicode",
+      "text": "Study ID: SYN-005\nPhase: II\nParticipants: 48\nIntervention: Caf\u00e9-derived compound \ud83e\uddea\nPrimary Endpoint: Re\u0301sume\u0301 score change\nSponsor: Fondation d'\u00c9tude Synth\u00e9tique\n",
+      "gold": {
+        "study_id": "SYN-005",
+        "phase": "2",
+        "participants": 48,
+        "intervention": "Caf\u00e9-derived compound \ud83e\uddea",
+        "primary_endpoint": "Re\u0301sume\u0301 score change",
+        "sponsor": "Fondation d'\u00c9tude Synth\u00e9tique",
+        "condition": null,
+        "study_type": null,
+        "secondary_endpoint": null
+      },
+      "notes": "Composed and decomposed accents, astral emoji; values are compared verbatim (no NFC folding)."
+    },
+    {
+      "id": "syn-006-trailing-whitespace",
+      "text": "Study ID: SYN-006   \nPhase:\t3\t\nParticipants: 90 \nIntervention: Example compound C  \nPrimary Endpoint: Synthetic response rate\u00a0\n",
+      "gold": {
+        "study_id": "SYN-006",
+        "phase": "3",
+        "participants": 90,
+        "intervention": "Example compound C",
+        "primary_endpoint": "Synthetic response rate",
+        "sponsor": null,
+        "condition": null,
+        "study_type": null,
+        "secondary_endpoint": null
+      },
+      "notes": "Leading/trailing spaces, tabs and a no-break space around values."
+    },
+    {
+      "id": "syn-007-missing-fields",
+      "text": "Study ID: SYN-007\nIntervention: Example compound D\nCondition: Example condition\n",
+      "gold": {
+        "study_id": "SYN-007",
+        "phase": null,
+        "participants": null,
+        "intervention": "Example compound D",
+        "primary_endpoint": null,
+        "sponsor": null,
+        "condition": "Example condition",
+        "study_type": null,
+        "secondary_endpoint": null
+      },
+      "notes": "Most fields absent; gold is null for them."
+    },
+    {
+      "id": "syn-008-not-exact-count",
+      "text": "Study ID: SYN-008\nPhase: 2\nParticipants: approximately 60\nPrimary Endpoint: Synthetic biomarker level\n",
+      "gold": {
+        "study_id": "SYN-008",
+        "phase": "2",
+        "participants": null,
+        "intervention": null,
+        "primary_endpoint": "Synthetic biomarker level",
+        "sponsor": null,
+        "condition": null,
+        "study_type": null,
+        "secondary_endpoint": null
+      },
+      "notes": "Participant count is not an exact integer, so gold is null (reviewer must decide)."
+    },
+    {
+      "id": "syn-009-generic-study-label",
+      "text": "Study: Long-term synthetic follow-up\nProtocol ID: SYN-009\nPhase: 3\nParticipants: 410\nPrimary Endpoint: Synthetic event rate\n",
+      "gold": {
+        "study_id": "SYN-009",
+        "phase": "3",
+        "participants": 410,
+        "intervention": null,
+        "primary_endpoint": "Synthetic event rate",
+        "sponsor": null,
+        "condition": null,
+        "study_type": null,
+        "secondary_endpoint": null
+      },
+      "notes": "A generic 'Study:' title line precedes the real identifier; the rule extractor reads 'Study:' as a study ID label."
+    },
+    {
+      "id": "syn-010-prose",
+      "text": "SYN-010 is a phase 2 synthetic study enrolling 80 participants to test Example compound E. The primary endpoint is the change in a synthetic score.\n",
+      "gold": {
+        "study_id": "SYN-010",
+        "phase": "2",
+        "participants": 80,
+        "intervention": "Example compound E",
+        "primary_endpoint": "change in a synthetic score",
+        "sponsor": null,
+        "condition": null,
+        "study_type": null,
+        "secondary_endpoint": null
+      },
+      "notes": "Unlabelled prose; the labeled-line extractor is not expected to find these."
+    },
+    {
+      "id": "syn-011-markdown-bold-labels",
+      "text": "**Study ID:** SYN-011\n**Phase:** 1\n**Participants:** 16\n",
+      "gold": {
+        "study_id": "SYN-011",
+        "phase": "1",
+        "participants": 16,
+        "intervention": null,
+        "primary_endpoint": null,
+        "sponsor": null,
+        "condition": null,
+        "study_type": null,
+        "secondary_endpoint": null
+      },
+      "notes": "Markdown bold labels; label must start the line, so the rule extractor misses them."
+    },
+    {
+      "id": "syn-012-design-and-secondary",
+      "text": "Study ID: SYN-012\nPhase: IV\nParticipants: 2,000\nStudy design: Randomized controlled trial\nSecondary outcome: Synthetic quality-of-life index\nDisease: Example disease\n",
+      "gold": {
+        "study_id": "SYN-012",
+        "phase": "4",
+        "participants": 2000,
+        "intervention": null,
+        "primary_endpoint": null,
+        "sponsor": null,
+        "condition": "Example disease",
+        "study_type": "Randomized controlled trial",
+        "secondary_endpoint": "Synthetic quality-of-life index"
+      },
+      "notes": "Design/secondary/disease aliases."
+    }
+  ]
+}
