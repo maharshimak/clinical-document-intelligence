@@ -120,7 +120,9 @@ class OpenAICompatibleClinicalExtractor:
 
             if not isinstance(evidence, str) or not evidence.strip():
                 raise ValueError(f"Field {field} requires verbatim evidence.")
-            start = source_text.casefold().find(evidence.strip().casefold())
+            # Search the original text: case folding can change Unicode length
+            # and would return offsets that do not identify the quoted evidence.
+            start = source_text.find(evidence.strip())
             if start < 0:
                 raise ValueError(f"Evidence for {field} is not present in the source.")
             end = start + len(evidence.strip())
@@ -145,14 +147,15 @@ class OpenAICompatibleClinicalExtractor:
                 value = {"I": "1", "II": "2", "III": "3", "IV": "4"}.get(
                     rendered.upper(), rendered
                 )
-                evidence_phase = evidence.upper()
                 supported = {
-                    "1": ("PHASE 1", "PHASE I"),
-                    "2": ("PHASE 2", "PHASE II"),
-                    "3": ("PHASE 3", "PHASE III"),
-                    "4": ("PHASE 4", "PHASE IV"),
-                }.get(str(value), ())
-                if supported and not any(token in evidence_phase for token in supported):
+                    "1": r"(?:1|I)",
+                    "2": r"(?:2|II)",
+                    "3": r"(?:3|III)",
+                    "4": r"(?:4|IV)",
+                }.get(str(value))
+                if supported and not re.search(
+                    rf"\bphase\s+{supported}\b(?!\.\d)", evidence, flags=re.IGNORECASE
+                ):
                     raise ValueError("phase value is not supported by its evidence span.")
             else:
                 value = str(value).strip()
